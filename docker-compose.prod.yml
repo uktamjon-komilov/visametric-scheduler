@@ -3,7 +3,7 @@ version: "3.8"
 services:
   web:
     build: .
-    command: gunicorn config.wsgi.application --bind 0.0.0.0:8005
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8005
     volumes:
       - ./static:/home/user/web/static/
       - ./media:/home/user/web/media/
