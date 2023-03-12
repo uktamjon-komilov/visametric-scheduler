@@ -3,26 +3,30 @@ version: "3.8"
 services:
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8005
+    command: gunicorn config.wsgi.application --bind 0.0.0.0:8005
     volumes:
-      - .:/home/user/web/
+      - ./static:/home/user/web/static/
+      - ./media:/home/user/web/media/
     ports:
       - 8005:8005
     env_file:
-      - ./.env
+      - ./.env.prod
     depends_on:
       - db
       - selenium
+      - redis
 
   db:
     image: postgres:13.0-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
-      - ./.env
+      - ./.env.prod.db
 
   redis:
     image: redis:alpine
+    ports:
+      - 6379:6379
 
   celery:
     build: .
@@ -36,18 +40,6 @@ services:
       - web
     command: celery --app config worker --loglevel=debug --without-mingle --without-gossip
 
-  beat:
-    build: .
-    volumes:
-      - .:/home/user/web/
-    env_file:
-      - ./.env
-    depends_on:
-      - db
-      - redis
-      - web
-    command: celery beat --app config --loglevel=debug -S django
-
   selenium:
     image: selenium/standalone-chrome
     ports:
@@ -55,3 +47,5 @@ services:
 
 volumes:
   postgres_data:
+  static_data:
+  media_data:
