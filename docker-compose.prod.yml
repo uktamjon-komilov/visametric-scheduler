@@ -33,7 +33,7 @@ services:
     volumes:
       - .:/home/user/web/
     env_file:
-      - ./.env
+      - ./.env.prod
     depends_on:
       - db
       - redis
