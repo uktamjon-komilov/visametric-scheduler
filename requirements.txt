@@ -41,4 +41,4 @@ urllib3==1.26.14
 vine==5.0.0
 wcwidth==0.2.6
 wsproto==1.2.0
-gunicorn==*
+gunicorn==20.1.0
