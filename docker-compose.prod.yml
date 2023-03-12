@@ -1,0 +1,57 @@
+version: "3.8"
+
+services:
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8005
+    volumes:
+      - .:/home/user/web/
+    ports:
+      - 8005:8005
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+      - selenium
+
+  db:
+    image: postgres:13.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env
+
+  redis:
+    image: redis:alpine
+
+  celery:
+    build: .
+    volumes:
+      - .:/home/user/web/
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+      - redis
+      - web
+    command: celery --app config worker --loglevel=debug --without-mingle --without-gossip
+
+  beat:
+    build: .
+    volumes:
+      - .:/home/user/web/
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+      - redis
+      - web
+    command: celery beat --app config --loglevel=debug -S django
+
+  selenium:
+    image: selenium/standalone-chrome
+    ports:
+      - 4444:4444
+
+volumes:
+  postgres_data:
